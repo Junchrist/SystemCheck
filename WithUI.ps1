@@ -60,6 +60,59 @@ if ($showGUI) {
     $servicesList.Font = New-Object System.Drawing.Font("Consolas", 10)
     $servicesList.BackColor = [System.Drawing.Color]::FromArgb(20, 20, 20)
     $servicesList.ForeColor = [System.Drawing.Color]::White
+    $servicesList.OwnerDraw = $true
+    
+    $servicesList.Add_DrawItem({
+        param($sender, $e)
+        
+        $item = $sender.Items[$e.Index]
+        
+        if ($e.ItemIndex -eq -1) { return }
+        
+        if (($e.State -band [System.Windows.Forms.ListViewItemStates]::Selected) -ne 0) {
+            $e.Graphics.FillRectangle([System.Drawing.Brushes]::FromArgb(60, 60, 60), $e.Bounds)
+        } else {
+            $e.Graphics.FillRectangle([System.Drawing.Brushes]::Black, $e.Bounds)
+        }
+        
+        $x = $e.Bounds.Left
+        $y = $e.Bounds.Top + 2
+        
+        $font = $sender.Font
+        
+        for ($i = 0; $i -lt $item.SubItems.Count; $i++) {
+            $subItem = $item.SubItems[$i]
+            $width = $sender.Columns[$i].Width
+            $rect = New-Object System.Drawing.Rectangle($x, $y, $width, $e.Bounds.Height - 4)
+            
+            if ($i -eq 0) {
+                $brush = [System.Drawing.Brushes]::White
+            } else {
+                $statusText = $item.SubItems[2].Text
+                $brush = [System.Drawing.Brushes]::White
+                
+                if ($statusText -eq "Running") {
+                    $brush = [System.Drawing.Brushes]::White
+                } elseif ($statusText -eq "Stopped") {
+                    $brush = [System.Drawing.Brushes]::Gray
+                } elseif ($statusText -eq "Not Found") {
+                    $brush = [System.Drawing.Brushes]::DarkGray
+                } else {
+                    $brush = [System.Drawing.Brushes]::LightGray
+                }
+            }
+            
+            $format = New-Object System.Drawing.StringFormat
+            $format.Alignment = "Near"
+            $format.LineAlignment = "Center"
+            
+            $e.Graphics.DrawString($subItem.Text, $font, $brush, $rect, $format)
+            
+            $x += $width
+        }
+        
+        $e.DrawDefault = $false
+    })
     
     $servicesList.Columns.Add("Service Name", 200)
     $servicesList.Columns.Add("Display Name", 350)
@@ -83,6 +136,59 @@ if ($showGUI) {
     $registryList.Font = New-Object System.Drawing.Font("Consolas", 10)
     $registryList.BackColor = [System.Drawing.Color]::FromArgb(20, 20, 20)
     $registryList.ForeColor = [System.Drawing.Color]::White
+    $registryList.OwnerDraw = $true
+    
+    $registryList.Add_DrawItem({
+        param($sender, $e)
+        
+        $item = $sender.Items[$e.Index]
+        
+        if ($e.ItemIndex -eq -1) { return }
+        
+        if (($e.State -band [System.Windows.Forms.ListViewItemStates]::Selected) -ne 0) {
+            $e.Graphics.FillRectangle([System.Drawing.Brushes]::FromArgb(60, 60, 60), $e.Bounds)
+        } else {
+            $e.Graphics.FillRectangle([System.Drawing.Brushes]::Black, $e.Bounds)
+        }
+        
+        $x = $e.Bounds.Left
+        $y = $e.Bounds.Top + 2
+        
+        $font = $sender.Font
+        
+        for ($i = 0; $i -lt $item.SubItems.Count; $i++) {
+            $subItem = $item.SubItems[$i]
+            $width = $sender.Columns[$i].Width
+            $rect = New-Object System.Drawing.Rectangle($x, $y, $width, $e.Bounds.Height - 4)
+            
+            if ($i -eq 0) {
+                $brush = [System.Drawing.Brushes]::White
+            } else {
+                $statusText = $item.SubItems[1].Text
+                $brush = [System.Drawing.Brushes]::White
+                
+                if ($statusText -eq "YES") {
+                    $brush = [System.Drawing.Brushes]::White
+                } elseif ($statusText -eq "NO") {
+                    $brush = [System.Drawing.Brushes]::Gray
+                } elseif ($statusText -eq "N/A") {
+                    $brush = [System.Drawing.Brushes]::DarkGray
+                } else {
+                    $brush = [System.Drawing.Brushes]::LightGray
+                }
+            }
+            
+            $format = New-Object System.Drawing.StringFormat
+            $format.Alignment = "Near"
+            $format.LineAlignment = "Center"
+            
+            $e.Graphics.DrawString($subItem.Text, $font, $brush, $rect, $format)
+            
+            $x += $width
+        }
+        
+        $e.DrawDefault = $false
+    })
     
     $registryList.Columns.Add("Setting", 250)
     $registryList.Columns.Add("Status", 150)
