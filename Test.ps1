@@ -1,4 +1,3 @@
-```powershell
 Clear-Host
 
 Add-Type -AssemblyName System.Windows.Forms
@@ -415,4 +414,3 @@ try {
 finally {
     Stop-Checker
 }
-```
