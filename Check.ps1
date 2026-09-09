@@ -1,6 +1,31 @@
 Clear-Host
 
-Write-Host @"
+Add-Type -AssemblyName System.Windows.Forms
+Add-Type -AssemblyName System.Drawing
+
+function Set-ConsoleTitle {
+    param($Title)
+    $null = [System.Console]::Title = $Title
+}
+
+$titles = @(
+    "[ @sYs ] | PC-CHECK",
+    "[ @sYs ] | CHECK",
+    "[ @sYs ] | @junchrist",
+    "[ @sYs ] | SYSTEM",
+    "[ @sYs ] | REGISTRY"
+)
+
+$titleIndex = 0
+$timer = [System.Windows.Forms.Timer]::new()
+$timer.Interval = 1000
+$timer.Add_Tick({
+    $global:titleIndex = ($global:titleIndex + 1) % $titles.Length
+    Set-ConsoleTitle -Title $titles[$global:titleIndex]
+})
+$timer.Start()
+
+$asciiArt = @"
 ▓█████  █    ██  ▄████▄   ██░ ██  ▄▄▄       ██▀███   ██▓  ██████ ▄▄▄█████▓
 ▓█   ▀  ██  ▓██▒▒██▀ ▀█  ▓██░ ██▒▒████▄    ▓██ ▒ ██▒▓██▒▒██    ▒ ▓  ██▒ ▓▒
 ▒███   ▓██  ▒██░▒▓█    ▄ ▒██▀▀██░▒██  ▀█▄  ▓██ ░▄█ ▒▒██▒░ ▓██▄   ▒ ▓██░ ▒░
@@ -11,7 +36,22 @@ Write-Host @"
    ░    ░░░ ░ ░ ░         ░  ░░ ░  ░   ▒     ░░   ░  ▒ ░░  ░  ░    ░      
    ░  ░   ░     ░ ░       ░  ░  ░      ░  ░   ░      ░        ░           
                 ░                                                         
-"@ -ForegroundColor Cyan
+"@
+
+function Fade-Print {
+    param($Text, $Delay = 50)
+    $lines = $Text -split "`n"
+    foreach ($line in $lines) {
+        if ($line.Trim() -ne "") {
+            Write-Host $line -ForegroundColor Cyan
+        } else {
+            Write-Host ""
+        }
+        Start-Sleep -Milliseconds $Delay
+    }
+}
+
+Fade-Print -Text $asciiArt -Delay 30
 
 Write-Host ""
 Write-Host "                    SYSTEM SERVICE & REGISTRY CHECKER" -ForegroundColor White
@@ -19,7 +59,7 @@ Write-Host "                    Created by @junchrist on Discord" -ForegroundCol
 Write-Host ""
 
 Write-Host "SERVICE STATUS" -ForegroundColor Cyan
-Write-Host ("=" * 40) -ForegroundColor Cyan
+Write-Host ("═" * 50) -ForegroundColor Cyan
 
 $services = @(
     @{Name="SysMain"; Display="SysMain"},
@@ -49,7 +89,7 @@ foreach ($svc in $services) {
 
 Write-Host ""
 Write-Host "REGISTRY SETTINGS" -ForegroundColor Cyan
-Write-Host ("=" * 40) -ForegroundColor Cyan
+Write-Host ("═" * 50) -ForegroundColor Cyan
 
 try {
     $prefetch = Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management\PrefetchParameters" -Name "EnablePrefetcher" -ErrorAction SilentlyContinue
@@ -145,6 +185,23 @@ try {
 }
 
 Write-Host ""
-Write-Host ("=" * 40) -ForegroundColor Gray
+Write-Host ("═" * 50) -ForegroundColor Gray
 Write-Host "Check Complete!" -ForegroundColor Green
-Read-Host "`nPress Enter to exit"
+
+Write-Host ""
+Write-Host "Options:" -ForegroundColor Yellow
+Write-Host "  [1] Run again" -ForegroundColor White
+Write-Host "  [2] Exit" -ForegroundColor White
+Write-Host ""
+
+$choice = Read-Host "Enter your choice (1 or 2)"
+
+if ($choice -eq "1") {
+    Clear-Host
+    & $MyInvocation.MyCommand.Path
+} else {
+    Write-Host "Exiting..." -ForegroundColor Gray
+    $timer.Stop()
+    $timer.Dispose()
+    exit
+}
