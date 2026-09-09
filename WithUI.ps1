@@ -21,12 +21,12 @@ if ($showGUI) {
     $form.StartPosition = "CenterScreen"
     $form.FormBorderStyle = "FixedSingle"
     $form.MaximizeBox = $false
-    $form.BackColor = [System.Drawing.Color]::FromArgb(30, 30, 46)
+    $form.BackColor = [System.Drawing.Color]::Black
     
     $headerLabel = New-Object System.Windows.Forms.Label
     $headerLabel.Text = "SYSTEM SERVICE & REGISTRY CHECKER"
     $headerLabel.Font = New-Object System.Drawing.Font("Segoe UI", 16, [System.Drawing.FontStyle]::Bold)
-    $headerLabel.ForeColor = [System.Drawing.Color]::Cyan
+    $headerLabel.ForeColor = [System.Drawing.Color]::White
     $headerLabel.Size = New-Object System.Drawing.Size(950, 40)
     $headerLabel.Location = New-Object System.Drawing.Point(25, 20)
     $headerLabel.TextAlign = "MiddleCenter"
@@ -48,7 +48,8 @@ if ($showGUI) {
     
     $servicesTab = New-Object System.Windows.Forms.TabPage
     $servicesTab.Text = "Services"
-    $servicesTab.BackColor = [System.Drawing.Color]::FromArgb(40, 40, 56)
+    $servicesTab.BackColor = [System.Drawing.Color]::Black
+    $servicesTab.ForeColor = [System.Drawing.Color]::White
     
     $servicesList = New-Object System.Windows.Forms.ListView
     $servicesList.Size = New-Object System.Drawing.Size(920, 480)
@@ -57,7 +58,7 @@ if ($showGUI) {
     $servicesList.FullRowSelect = $true
     $servicesList.GridLines = $true
     $servicesList.Font = New-Object System.Drawing.Font("Consolas", 10)
-    $servicesList.BackColor = [System.Drawing.Color]::FromArgb(50, 50, 70)
+    $servicesList.BackColor = [System.Drawing.Color]::FromArgb(20, 20, 20)
     $servicesList.ForeColor = [System.Drawing.Color]::White
     
     $servicesList.Columns.Add("Service Name", 200)
@@ -70,7 +71,8 @@ if ($showGUI) {
     
     $registryTab = New-Object System.Windows.Forms.TabPage
     $registryTab.Text = "Registry"
-    $registryTab.BackColor = [System.Drawing.Color]::FromArgb(40, 40, 56)
+    $registryTab.BackColor = [System.Drawing.Color]::Black
+    $registryTab.ForeColor = [System.Drawing.Color]::White
     
     $registryList = New-Object System.Windows.Forms.ListView
     $registryList.Size = New-Object System.Drawing.Size(920, 480)
@@ -79,7 +81,7 @@ if ($showGUI) {
     $registryList.FullRowSelect = $true
     $registryList.GridLines = $true
     $registryList.Font = New-Object System.Drawing.Font("Consolas", 10)
-    $registryList.BackColor = [System.Drawing.Color]::FromArgb(50, 50, 70)
+    $registryList.BackColor = [System.Drawing.Color]::FromArgb(20, 20, 20)
     $registryList.ForeColor = [System.Drawing.Color]::White
     
     $registryList.Columns.Add("Setting", 250)
@@ -92,11 +94,12 @@ if ($showGUI) {
     $form.Controls.Add($tabControl)
     
     $statusBar = New-Object System.Windows.Forms.StatusStrip
-    $statusBar.BackColor = [System.Drawing.Color]::FromArgb(20, 20, 36)
+    $statusBar.BackColor = [System.Drawing.Color]::FromArgb(20, 20, 20)
+    $statusBar.ForeColor = [System.Drawing.Color]::White
     
     $statusLabel = New-Object System.Windows.Forms.ToolStripStatusLabel
     $statusLabel.Text = "Ready"
-    $statusLabel.ForeColor = [System.Drawing.Color]::Cyan
+    $statusLabel.ForeColor = [System.Drawing.Color]::White
     $statusBar.Items.Add($statusLabel)
     
     $form.Controls.Add($statusBar)
@@ -110,10 +113,10 @@ if ($showGUI) {
         $item.SubItems.Add($details)
         
         switch ($status) {
-            "Running" { $item.ForeColor = [System.Drawing.Color]::Green }
-            "Stopped" { $item.ForeColor = [System.Drawing.Color]::Red }
-            "Not Found" { $item.ForeColor = [System.Drawing.Color]::Gray }
-            default { $item.ForeColor = [System.Drawing.Color]::Yellow }
+            "Running" { $item.ForeColor = [System.Drawing.Color]::White }
+            "Stopped" { $item.ForeColor = [System.Drawing.Color]::Gray }
+            "Not Found" { $item.ForeColor = [System.Drawing.Color]::DarkGray }
+            default { $item.ForeColor = [System.Drawing.Color]::LightGray }
         }
         
         $servicesList.Items.Add($item)
@@ -127,10 +130,10 @@ if ($showGUI) {
         $item.SubItems.Add($details)
         
         switch ($status) {
-            "YES" { $item.ForeColor = [System.Drawing.Color]::Green }
-            "NO" { $item.ForeColor = [System.Drawing.Color]::Red }
-            "N/A" { $item.ForeColor = [System.Drawing.Color]::Gray }
-            default { $item.ForeColor = [System.Drawing.Color]::Yellow }
+            "YES" { $item.ForeColor = [System.Drawing.Color]::White }
+            "NO" { $item.ForeColor = [System.Drawing.Color]::Gray }
+            "N/A" { $item.ForeColor = [System.Drawing.Color]::DarkGray }
+            default { $item.ForeColor = [System.Drawing.Color]::LightGray }
         }
         
         $registryList.Items.Add($item)
