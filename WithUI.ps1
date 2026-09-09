@@ -65,9 +65,9 @@ if ($showGUI) {
     $servicesList.Add_DrawItem({
         param($sender, $e)
         
-        $item = $sender.Items[$e.Index]
+        if ($e.Index -lt 0 -or $e.Index -ge $sender.Items.Count) { return }
         
-        if ($e.ItemIndex -eq -1) { return }
+        $item = $sender.Items[$e.Index]
         
         if (($e.State -band [System.Windows.Forms.ListViewItemStates]::Selected) -ne 0) {
             $e.Graphics.FillRectangle([System.Drawing.Brushes]::FromArgb(60, 60, 60), $e.Bounds)
@@ -89,16 +89,15 @@ if ($showGUI) {
                 $brush = [System.Drawing.Brushes]::White
             } else {
                 $statusText = $item.SubItems[2].Text
-                $brush = [System.Drawing.Brushes]::White
                 
                 if ($statusText -eq "Running") {
-                    $brush = [System.Drawing.Brushes]::White
+                    $brush = [System.Drawing.Brushes]::Green
                 } elseif ($statusText -eq "Stopped") {
-                    $brush = [System.Drawing.Brushes]::Gray
+                    $brush = [System.Drawing.Brushes]::Red
                 } elseif ($statusText -eq "Not Found") {
-                    $brush = [System.Drawing.Brushes]::DarkGray
+                    $brush = [System.Drawing.Brushes]::Gray
                 } else {
-                    $brush = [System.Drawing.Brushes]::LightGray
+                    $brush = [System.Drawing.Brushes]::DarkGray
                 }
             }
             
@@ -141,9 +140,9 @@ if ($showGUI) {
     $registryList.Add_DrawItem({
         param($sender, $e)
         
-        $item = $sender.Items[$e.Index]
+        if ($e.Index -lt 0 -or $e.Index -ge $sender.Items.Count) { return }
         
-        if ($e.ItemIndex -eq -1) { return }
+        $item = $sender.Items[$e.Index]
         
         if (($e.State -band [System.Windows.Forms.ListViewItemStates]::Selected) -ne 0) {
             $e.Graphics.FillRectangle([System.Drawing.Brushes]::FromArgb(60, 60, 60), $e.Bounds)
@@ -165,16 +164,15 @@ if ($showGUI) {
                 $brush = [System.Drawing.Brushes]::White
             } else {
                 $statusText = $item.SubItems[1].Text
-                $brush = [System.Drawing.Brushes]::White
                 
                 if ($statusText -eq "YES") {
-                    $brush = [System.Drawing.Brushes]::White
+                    $brush = [System.Drawing.Brushes]::Green
                 } elseif ($statusText -eq "NO") {
-                    $brush = [System.Drawing.Brushes]::Gray
+                    $brush = [System.Drawing.Brushes]::Red
                 } elseif ($statusText -eq "N/A") {
-                    $brush = [System.Drawing.Brushes]::DarkGray
+                    $brush = [System.Drawing.Brushes]::Gray
                 } else {
-                    $brush = [System.Drawing.Brushes]::LightGray
+                    $brush = [System.Drawing.Brushes]::DarkGray
                 }
             }
             
@@ -218,13 +216,6 @@ if ($showGUI) {
         $item.SubItems.Add($status)
         $item.SubItems.Add($details)
         
-        switch ($status) {
-            "Running" { $item.ForeColor = [System.Drawing.Color]::White }
-            "Stopped" { $item.ForeColor = [System.Drawing.Color]::Gray }
-            "Not Found" { $item.ForeColor = [System.Drawing.Color]::DarkGray }
-            default { $item.ForeColor = [System.Drawing.Color]::LightGray }
-        }
-        
         $servicesList.Items.Add($item)
     }
     
@@ -234,13 +225,6 @@ if ($showGUI) {
         $item = New-Object System.Windows.Forms.ListViewItem($setting)
         $item.SubItems.Add($status)
         $item.SubItems.Add($details)
-        
-        switch ($status) {
-            "YES" { $item.ForeColor = [System.Drawing.Color]::White }
-            "NO" { $item.ForeColor = [System.Drawing.Color]::Gray }
-            "N/A" { $item.ForeColor = [System.Drawing.Color]::DarkGray }
-            default { $item.ForeColor = [System.Drawing.Color]::LightGray }
-        }
         
         $registryList.Items.Add($item)
     }
@@ -410,15 +394,15 @@ foreach ($svc in $services) {
         $service = Get-Service -Name $svc.Name -ErrorAction SilentlyContinue
         if ($service) {
             if ($service.Status -eq "Running") {
-                Write-Host ("  {0,-10} {1,-40} {2,-10}" -f $svc.Name, $svc.Display, "RUNNING") -ForegroundColor White
+                Write-Host ("  {0,-10} {1,-40} {2,-10}" -f $svc.Name, $svc.Display, "RUNNING") -ForegroundColor Green
             } else {
-                Write-Host ("  {0,-10} {1,-40} {2,-10}" -f $svc.Name, $svc.Display, $service.Status.ToString().ToUpper()) -ForegroundColor Gray
+                Write-Host ("  {0,-10} {1,-40} {2,-10}" -f $svc.Name, $svc.Display, $service.Status.ToString().ToUpper()) -ForegroundColor Red
             }
         } else {
-            Write-Host ("  {0,-10} {1,-40} {2,-10}" -f $svc.Name, $svc.Display, "NOT FOUND") -ForegroundColor DarkGray
+            Write-Host ("  {0,-10} {1,-40} {2,-10}" -f $svc.Name, $svc.Display, "NOT FOUND") -ForegroundColor Gray
         }
     } catch {
-        Write-Host ("  {0,-10} {1,-40} ERROR" -f $svc.Name, $svc.Display) -ForegroundColor Gray
+        Write-Host ("  {0,-10} {1,-40} ERROR" -f $svc.Name, $svc.Display) -ForegroundColor Red
     }
 }
 
@@ -430,93 +414,93 @@ try {
     $prefetch = Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management\PrefetchParameters" -Name "EnablePrefetcher" -ErrorAction SilentlyContinue
     if ($prefetch) {
         switch ($prefetch.EnablePrefetcher) {
-            3 { $status = "Enabled (App and Boot)"; $color = "White" }
-            2 { $status = "Enabled (Boot only)"; $color = "White" }
-            1 { $status = "Enabled (App only)"; $color = "White" }
-            0 { $status = "Disabled"; $color = "Gray" }
-            default { $status = "Unknown: $($prefetch.EnablePrefetcher)"; $color = "DarkGray" }
+            3 { $status = "Enabled (App and Boot)"; $color = "Green" }
+            2 { $status = "Enabled (Boot only)"; $color = "Green" }
+            1 { $status = "Enabled (App only)"; $color = "Green" }
+            0 { $status = "Disabled"; $color = "Red" }
+            default { $status = "Unknown: $($prefetch.EnablePrefetcher)"; $color = "Yellow" }
         }
         Write-Host ("  {0,-25} {1}" -f "Prefetch:", $status) -ForegroundColor $color
     } else {
-        Write-Host ("  {0,-25} {1}" -f "Prefetch:", "Not Found") -ForegroundColor DarkGray
+        Write-Host ("  {0,-25} {1}" -f "Prefetch:", "Not Found") -ForegroundColor Gray
     }
 } catch {
-    Write-Host ("  {0,-25} {1}" -f "Prefetch:", "Error") -ForegroundColor Gray
+    Write-Host ("  {0,-25} {1}" -f "Prefetch:", "Error") -ForegroundColor Red
 }
 
 try {
     $sysmainReg = Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management\PrefetchParameters" -Name "EnableSysMain" -ErrorAction SilentlyContinue
     if ($sysmainReg) {
         if ($sysmainReg.EnableSysMain -eq 1) {
-            Write-Host ("  {0,-25} {1}" -f "SysMain:", "Enabled") -ForegroundColor White
+            Write-Host ("  {0,-25} {1}" -f "SysMain:", "Enabled") -ForegroundColor Green
         } else {
-            Write-Host ("  {0,-25} {1}" -f "SysMain:", "Disabled") -ForegroundColor Gray
+            Write-Host ("  {0,-25} {1}" -f "SysMain:", "Disabled") -ForegroundColor Red
         }
     } else {
-        Write-Host ("  {0,-25} {1}" -f "SysMain:", "Not Found (Default: Enabled)") -ForegroundColor DarkGray
+        Write-Host ("  {0,-25} {1}" -f "SysMain:", "Not Found (Default: Enabled)") -ForegroundColor Yellow
     }
 } catch {
-    Write-Host ("  {0,-25} {1}" -f "SysMain:", "Error") -ForegroundColor Gray
+    Write-Host ("  {0,-25} {1}" -f "SysMain:", "Error") -ForegroundColor Red
 }
 
 try {
     $pcaReg = Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\ProgramCompatibilityAssistant" -Name "Enabled" -ErrorAction SilentlyContinue
     if ($pcaReg) {
         if ($pcaReg.Enabled -eq 1) {
-            Write-Host ("  {0,-25} {1}" -f "PcaSvc:", "Enabled") -ForegroundColor White
+            Write-Host ("  {0,-25} {1}" -f "PcaSvc:", "Enabled") -ForegroundColor Green
         } else {
-            Write-Host ("  {0,-25} {1}" -f "PcaSvc:", "Disabled") -ForegroundColor Gray
+            Write-Host ("  {0,-25} {1}" -f "PcaSvc:", "Disabled") -ForegroundColor Red
         }
     } else {
-        Write-Host ("  {0,-25} {1}" -f "PcaSvc:", "Not Found (Default: Enabled)") -ForegroundColor DarkGray
+        Write-Host ("  {0,-25} {1}" -f "PcaSvc:", "Not Found (Default: Enabled)") -ForegroundColor Yellow
     }
 } catch {
-    Write-Host ("  {0,-25} {1}" -f "PcaSvc:", "Error") -ForegroundColor Gray
+    Write-Host ("  {0,-25} {1}" -f "PcaSvc:", "Error") -ForegroundColor Red
 }
 
 try {
     $powershellLogging = Get-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging" -Name "EnableScriptBlockLogging" -ErrorAction SilentlyContinue
     if ($powershellLogging) {
         if ($powershellLogging.EnableScriptBlockLogging -eq 1) {
-            Write-Host ("  {0,-25} {1}" -f "PowerShell Logging:", "Enabled") -ForegroundColor White
+            Write-Host ("  {0,-25} {1}" -f "PowerShell Logging:", "Enabled") -ForegroundColor Green
         } else {
-            Write-Host ("  {0,-25} {1}" -f "PowerShell Logging:", "Disabled") -ForegroundColor Gray
+            Write-Host ("  {0,-25} {1}" -f "PowerShell Logging:", "Disabled") -ForegroundColor Red
         }
     } else {
-        Write-Host ("  {0,-25} {1}" -f "PowerShell Logging:", "Not Found (Default: Disabled)") -ForegroundColor DarkGray
+        Write-Host ("  {0,-25} {1}" -f "PowerShell Logging:", "Not Found (Default: Disabled)") -ForegroundColor Yellow
     }
 } catch {
-    Write-Host ("  {0,-25} {1}" -f "PowerShell Logging:", "Error") -ForegroundColor Gray
+    Write-Host ("  {0,-25} {1}" -f "PowerShell Logging:", "Error") -ForegroundColor Red
 }
 
 try {
     $cmd = Get-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Name "DisableCMD" -ErrorAction SilentlyContinue
     if ($cmd) {
         if ($cmd.DisableCMD -eq 0) {
-            Write-Host ("  {0,-25} {1}" -f "CMD Available:", "Yes") -ForegroundColor White
+            Write-Host ("  {0,-25} {1}" -f "CMD Available:", "Yes") -ForegroundColor Green
         } else {
-            Write-Host ("  {0,-25} {1}" -f "CMD Available:", "No") -ForegroundColor Gray
+            Write-Host ("  {0,-25} {1}" -f "CMD Available:", "No") -ForegroundColor Red
         }
     } else {
-        Write-Host ("  {0,-25} {1}" -f "CMD Available:", "Yes (Default)") -ForegroundColor White
+        Write-Host ("  {0,-25} {1}" -f "CMD Available:", "Yes (Default)") -ForegroundColor Green
     }
 } catch {
-    Write-Host ("  {0,-25} {1}" -f "CMD Available:", "Error") -ForegroundColor Gray
+    Write-Host ("  {0,-25} {1}" -f "CMD Available:", "Error") -ForegroundColor Red
 }
 
 try {
     $activitiesCache = Get-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Name "EnableActivityFeed" -ErrorAction SilentlyContinue
     if ($activitiesCache) {
         if ($activitiesCache.EnableActivityFeed -eq 1) {
-            Write-Host ("  {0,-25} {1}" -f "Activities Cache:", "Enabled") -ForegroundColor White
+            Write-Host ("  {0,-25} {1}" -f "Activities Cache:", "Enabled") -ForegroundColor Green
         } else {
-            Write-Host ("  {0,-25} {1}" -f "Activities Cache:", "Disabled") -ForegroundColor Gray
+            Write-Host ("  {0,-25} {1}" -f "Activities Cache:", "Disabled") -ForegroundColor Red
         }
     } else {
-        Write-Host ("  {0,-25} {1}" -f "Activities Cache:", "Not Found (Default: Enabled)") -ForegroundColor DarkGray
+        Write-Host ("  {0,-25} {1}" -f "Activities Cache:", "Not Found (Default: Enabled)") -ForegroundColor Yellow
     }
 } catch {
-    Write-Host ("  {0,-25} {1}" -f "Activities Cache:", "Error") -ForegroundColor Gray
+    Write-Host ("  {0,-25} {1}" -f "Activities Cache:", "Error") -ForegroundColor Red
 }
 
 Write-Host ""
